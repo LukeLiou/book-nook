@@ -1,0 +1,144 @@
+{
+  "name": "book-nook",
+  "displayName": "BookNook 读书角",
+  "description": "在 VS Code / Cursor 侧边栏或编辑区阅读本地 EPUB、TXT，支持全局书架与阅读进度记忆。",
+  "version": "0.1.0",
+  "publisher": "booknook",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/LukeLiou/book-nook.git"
+  },
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [],
+  "main": "./out/extension.js",
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "booknook",
+          "title": "BookNook",
+          "icon": "media/booknook.svg"
+        }
+      ]
+    },
+    "views": {
+      "booknook": [
+        {
+          "id": "booknook.bookshelf",
+          "name": "书架"
+        },
+        {
+          "type": "webview",
+          "id": "booknook.reader",
+          "name": "阅读",
+          "when": "booknook.readerLocation == sidebar"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "booknook.importBook",
+        "title": "BookNook: 导入书籍",
+        "icon": "$(add)"
+      },
+      {
+        "command": "booknook.openBook",
+        "title": "BookNook: 打开书籍"
+      },
+      {
+        "command": "booknook.removeBook",
+        "title": "BookNook: 从书架移除",
+        "icon": "$(trash)"
+      },
+      {
+        "command": "booknook.refreshBookshelf",
+        "title": "BookNook: 刷新书架",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "booknook.toggleReaderLocation",
+        "title": "BookNook: 切换阅读区位置（侧边栏 / 编辑区）"
+      }
+    ],
+    "menus": {
+      "view/title": [
+        {
+          "command": "booknook.importBook",
+          "when": "view == booknook.bookshelf",
+          "group": "navigation@1"
+        },
+        {
+          "command": "booknook.refreshBookshelf",
+          "when": "view == booknook.bookshelf",
+          "group": "navigation@2"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "booknook.removeBook",
+          "when": "view == booknook.bookshelf && viewItem == book",
+          "group": "inline"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "BookNook",
+      "properties": {
+        "booknook.readerLocation": {
+          "type": "string",
+          "enum": [
+            "sidebar",
+            "editor"
+          ],
+          "enumDescriptions": [
+            "在左侧 BookNook 面板的「阅读」视图中打开",
+            "在主编辑区以 Webview 面板打开"
+          ],
+          "default": "sidebar",
+          "description": "阅读区位置"
+        },
+        "booknook.fontSize": {
+          "type": "number",
+          "default": 16,
+          "minimum": 12,
+          "maximum": 32,
+          "description": "正文字号（px）"
+        },
+        "booknook.lineHeight": {
+          "type": "number",
+          "default": 1.8,
+          "minimum": 1.2,
+          "maximum": 3,
+          "description": "正文行高倍数"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "npm run copy:epub && tsc -p ./",
+    "copy:epub": "node scripts/copy-epub.js",
+    "watch": "tsc -watch -p ./",
+    "package": "vsce package",
+    "lint": "eslint src --ext .ts"
+  },
+  "dependencies": {
+    "@xmldom/xmldom": "^0.8.10",
+    "epubjs": "^0.3.93",
+    "iconv-lite": "^0.6.3",
+    "jschardet": "^3.1.4",
+    "jszip": "^3.10.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.30",
+    "@types/vscode": "^1.85.0",
+    "@vscode/vsce": "^2.24.0",
+    "typescript": "^5.4.5"
+  }
+}

@@ -1,0 +1,110 @@
+:root {
+  --bn-font-size: 16px;
+  --bn-line-height: 1.8;
+  --bn-bg: var(--vscode-editor-background, #1e1e1e);
+  --bn-fg: var(--vscode-editor-foreground, #d4d4d4);
+  --bn-muted: var(--vscode-descriptionForeground, #999);
+  --bn-border: var(--vscode-panel-border, #3c3c3c);
+  --bn-accent: var(--vscode-textLink-foreground, #3794ff);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  background: var(--bn-bg);
+  color: var(--bn-fg);
+  font-family: var(--vscode-font-family, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif);
+  overflow: hidden;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+}
+
+#toolbar {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--bn-border);
+  background: var(--vscode-sideBar-background, var(--bn-bg));
+}
+
+#toolbar button {
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--bn-border);
+  border-radius: 4px;
+  background: transparent;
+  color: var(--bn-fg);
+  cursor: pointer;
+  font-size: 18px;
+  line-height: 1;
+}
+
+#toolbar button:hover {
+  background: var(--vscode-toolbar-hoverBackground, rgba(128, 128, 128, 0.2));
+}
+
+#toc-select {
+  flex: 1;
+  min-width: 0;
+  height: 28px;
+  border: 1px solid var(--bn-border);
+  border-radius: 4px;
+  background: var(--bn-bg);
+  color: var(--bn-fg);
+  font-size: 12px;
+}
+
+#progress-text {
+  flex: 0 0 auto;
+  font-size: 11px;
+  color: var(--bn-muted);
+  white-space: nowrap;
+}
+
+#reader-shell {
+  flex: 1 1 auto;
+  min-height: 0;
+  position: relative;
+  overflow: hidden;
+}
+
+#txt-reader,
+#epub-view {
+  position: absolute;
+  inset: 0;
+  overflow: auto;
+}
+
+#txt-reader {
+  padding: 16px 18px 32px;
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-size: var(--bn-font-size);
+  line-height: var(--bn-line-height);
+}
+
+#epub-view iframe {
+  border: none;
+  background: var(--bn-bg) !important;
+}
+
+.hidden {
+  display: none !important;
+}
+
+#status {
+  padding: 24px;
+  text-align: center;
+  color: var(--bn-muted);
+}
