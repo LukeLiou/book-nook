@@ -1,45 +1,35 @@
 import * as vscode from 'vscode';
 import { BookshelfStore } from './storage/bookshelfStore';
 import { importBookFromFile } from './storage/importBook';
-import { BookTreeItem, BookshelfProvider } from './bookshelf/bookshelfProvider';
-import { ReaderViewProvider } from './reader/readerViewProvider';
-import {
-  getConfiguredReaderLocation,
-  ReaderPanelManager,
-  ReaderSession,
-  updateReaderLocationContext
-} from './reader/readerManager';
+import { BookshelfViewProvider } from './bookshelf/bookshelfViewProvider';
+import { ReaderPanelManager, updateReaderLocationContext } from './reader/readerManager';
 
 let store: BookshelfStore;
-let bookshelfProvider: BookshelfProvider;
-let readerViewProvider: ReaderViewProvider;
+let bookshelfViewProvider: BookshelfViewProvider;
 let panelManager: ReaderPanelManager;
 
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
   store = new BookshelfStore(context);
   await store.initialize();
 
-  bookshelfProvider = new BookshelfProvider(store);
+  bookshelfViewProvider = new BookshelfViewProvider(context.extensionUri, store);
   context.subscriptions.push(
-    vscode.window.registerTreeDataProvider('booknook.bookshelf', bookshelfProvider)
-  );
-
-  const refreshBookshelf = () => bookshelfProvider.refresh();
-
-  readerViewProvider = new ReaderViewProvider(
-    context.extensionUri,
-    (getWebview, reveal) =>
-      new ReaderSession(store, context.extensionUri, getWebview, reveal)
-  );
-  context.subscriptions.push(
-    vscode.window.registerWebviewViewProvider('booknook.reader', readerViewProvider, {
+    vscode.window.registerWebviewViewProvider('booknook.bookshelf', bookshelfViewProvider, {
       webviewOptions: { retainContextWhenHidden: true }
     })
   );
 
+  const refreshBookshelf = () => void bookshelfViewProvider.refresh();
+
   panelManager = new ReaderPanelManager(store, context.extensionUri, refreshBookshelf);
 
   updateReaderLocationContext();
+  context.subscriptions.push(
+    vscode.window.onDidChangeActiveColorTheme(() => {
+      bookshelfViewProvider.notifyThemeChange();
+      panelManager.notifyThemeChange();
+    })
+  );
   context.subscriptions.push(
     vscode.workspace.onDidChangeConfiguration((e) => {
       if (e.affectsConfiguration('booknook.readerLocation')) {
@@ -49,13 +39,17 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
         e.affectsConfiguration('booknook.fontSize') ||
         e.affectsConfiguration('booknook.lineHeight')
       ) {
-        readerViewProvider.reloadSettings();
+        bookshelfViewProvider.reloadSettings();
         panelManager.reloadSettings();
       }
     })
   );
 
   context.subscriptions.push(
+    vscode.commands.registerCommand('booknook.goHome', () => {
+      void bookshelfViewProvider.goHome();
+    }),
+
     vscode.commands.registerCommand('booknook.importBook', async () => {
       const uris = await vscode.window.showOpenDialog({
         canSelectMany: false,
@@ -104,13 +98,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
       await openBookById(bookId);
     }),
 
-    vscode.commands.registerCommand('booknook.removeBook', async (item?: BookTreeItem | string) => {
-      let bookId: string | undefined;
-      if (typeof item === 'string') {
-        bookId = item;
-      } else if (item?.kind === 'book') {
-        bookId = item.book.id;
-      }
+    vscode.commands.registerCommand('booknook.removeBook', async (bookId?: string) => {
       if (!bookId) {
         const pick = await vscode.window.showQuickPick(
           store.getBooks().map((b) => ({
@@ -158,13 +146,14 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 }
 
 async function openBookById(bookId: string): Promise<void> {
-  const location = getConfiguredReaderLocation();
+  const location = vscode.workspace
+    .getConfiguration('booknook')
+    .get<'sidebar' | 'editor'>('readerLocation', 'sidebar');
   if (location === 'editor') {
     await panelManager.openBook(bookId);
   } else {
-    await readerViewProvider.openBook(bookId);
+    await bookshelfViewProvider.openBook(bookId);
   }
-  bookshelfProvider.refresh();
 }
 
 export function deactivate(): void {

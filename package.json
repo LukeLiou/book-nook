@@ -1,10 +1,30 @@
 {
   "name": "book-nook",
   "displayName": "BookNook 读书角",
-  "description": "在 VS Code / Cursor 侧边栏或编辑区阅读本地 EPUB、TXT，支持全局书架与阅读进度记忆。",
+  "description": "在 VS Code / Cursor 侧边栏或编辑区阅读本地 EPUB、TXT，支持书架与阅读进度记忆。Read EPUB & TXT with bookshelf and progress sync.",
   "version": "0.1.0",
   "publisher": "booknook",
   "license": "MIT",
+  "icon": "media/icon.png",
+  "galleryBanner": {
+    "color": "#f3f3f3",
+    "theme": "light"
+  },
+  "homepage": "https://github.com/LukeLiou/book-nook#readme",
+  "bugs": {
+    "url": "https://github.com/LukeLiou/book-nook/issues"
+  },
+  "qna": "https://github.com/LukeLiou/book-nook/issues",
+  "keywords": [
+    "epub",
+    "txt",
+    "reader",
+    "books",
+    "reading",
+    "bookshelf",
+    "电子书",
+    "阅读"
+  ],
   "repository": {
     "type": "git",
     "url": "https://github.com/LukeLiou/book-nook.git"
@@ -30,18 +50,17 @@
     "views": {
       "booknook": [
         {
-          "id": "booknook.bookshelf",
-          "name": "书架"
-        },
-        {
           "type": "webview",
-          "id": "booknook.reader",
-          "name": "阅读",
-          "when": "booknook.readerLocation == sidebar"
+          "id": "booknook.bookshelf",
+          "name": "BookNook"
         }
       ]
     },
     "commands": [
+      {
+        "command": "booknook.goHome",
+        "title": "BookNook: 返回书架"
+      },
       {
         "command": "booknook.importBook",
         "title": "BookNook: 导入书籍",
@@ -79,13 +98,7 @@
           "group": "navigation@2"
         }
       ],
-      "view/item/context": [
-        {
-          "command": "booknook.removeBook",
-          "when": "view == booknook.bookshelf && viewItem == book",
-          "group": "inline"
-        }
-      ]
+      "view/item/context": []
     },
     "configuration": {
       "title": "BookNook",
